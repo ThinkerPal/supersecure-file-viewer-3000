@@ -2,20 +2,16 @@
 session_start();
 
 if (!isset($_SESSION['username'])) {
-    header('Location: login.php'); // Redirect if not logged in
-    exit();
-}
-?>
-<?php
-session_start();
-
-if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
+    header('Location: /login.php');
     exit();
 }
 
 $baseDirectory = realpath('./');
 $directory = $baseDirectory;
+$requestedDir = '';
+
+$content = '';
+$currentFileName = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['dir'])) {
@@ -31,22 +27,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
-}
-
-$content = '';
-$currentFileName = '';
-if (isset($_POST['file'])) {
-    $fileToDisplay = $directory . '/' . $_POST['file'];
-    if (file_exists($fileToDisplay) && is_readable($fileToDisplay)) {
-
-
-        $content = htmlspecialchars(file_get_contents($fileToDisplay));
+    if (isset($_POST['file'])) {
+        $fileToDisplay = $directory . '/' . $_POST['file'];
         $currentFileName = htmlspecialchars(basename($fileToDisplay)); // Get the filename
-    
-    } else {
-        $content = "File does not exist or is not readable.";
+        if (file_exists($fileToDisplay)) {
+
+            $_SESSION['requested_file'] = $fileToDisplay;
+            if (is_readable($fileToDisplay)) {
+                $content = htmlspecialchars(file_get_contents($fileToDisplay));
+            } else {
+                $content = "File is not readable.";
+            }
+        
+        } else {
+            $content = "File does not exist.";
+        }
     }
 }
+
 
 $items = scandir($directory);
 $parentDir = dirname($directory);
@@ -75,8 +73,14 @@ usort($items, function($a, $b) use ($directory) {
 
     <div class="mb-3 d-flex justify-content-between align-items-center">
         <span class="h4">Current Directory: <?php echo htmlspecialchars(basename($directory)); ?></span>
-        <?php if ($currentFileName): ?>
+        <?php if (isset($currentFileName) && $currentFileName !== ''): ?>
             <span class="h4">Viewing: <?php echo htmlspecialchars($currentFileName); ?></span>
+                <?php if (isset($_SESSION['requested_file']) && isset($fileToDisplay) && $_SESSION['requested_file'] === $fileToDisplay): ?>
+                    <form action="download.php" method="POST" class="mt-2">
+                        <input type="hidden" name="requested_file" value="<?php $fileToDisplay ?>" >
+                        <button type="submit" class="btn btn-success">Download</button>
+                    </form>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 
@@ -114,7 +118,7 @@ usort($items, function($a, $b) use ($directory) {
                             <span>
                                 <?php if (is_dir($itemPath)): ?>
                                     <form action="" method="POST" style="display: inline;">
-                                        <input type="hidden" name="dir" value="<?php echo htmlspecialchars(trim($requestedDir . '/' . $item, '/')); ?>">
+                                        <input type="hidden" name="dir" value="<?php echo htmlspecialchars(trim($requestedDir . '/' . $item . '/')); ?>">
                                         <button type="submit" class="btn btn-primary btn-sm">Open</button>
                                     </form>
                                 <?php else: ?>

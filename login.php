@@ -11,7 +11,7 @@ $error_message = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
     $inputPassword = $_POST['password'];
-    echo $password;
+//    echo $password;
     // Simple authentication check
     if ($username === $valid_username && hash('sha256', $salt . $inputPassword) == $hashedPassword) {
         $_SESSION['username'] = $username;

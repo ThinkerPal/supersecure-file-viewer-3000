@@ -3,7 +3,7 @@ session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['username'])) {
-    header("Location: login.php");
+    header("Location: /login.php");
     exit();
 }
 
@@ -25,8 +25,10 @@ $username = htmlspecialchars($_SESSION['username']);
         <p class="lead">You have successfully logged in.</p>
         <a href="logout.php" class="btn btn-danger">Logout</a>
 
-        <h2 class="mt-5">PHP Source Code for login.php:</h2>
-        <pre><code><?php highlight_string(file_get_contents('login.php')); ?></code></pre>
+        <!-- <h2 class="mt-5">PHP Source Code for login.php:</h2>
+        <pre><code><?php
+        //  highlight_string(file_get_contents('login.php')); 
+         ?></code></pre> -->
     </div>
 </body>
 </html>
